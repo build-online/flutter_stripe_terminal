@@ -512,29 +512,29 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
         methodChannel.invokeMethod("onReadersFound", arguments: parsedReaders)
     }
 
-    func localMobileReader(_ reader: Reader, didStartInstallingUpdate update: ReaderSoftwareUpdate, cancelable: Cancelable?) {
+    public func localMobileReader(_ reader: Reader, didStartInstallingUpdate update: ReaderSoftwareUpdate, cancelable: Cancelable?) {
         // An update or configuration process has started.
         print("Entra a didStartInstallingUpdate")
     }
 
-    func localMobileReader(_ reader: Reader, didReportReaderSoftwareUpdateProgress progress: Float) {
+    public func localMobileReader(_ reader: Reader, didReportReaderSoftwareUpdateProgress progress: Float) {
         // The update or configuration process has reached the specified progress (0.0 to 1.0).
         print("Entra a didReportReaderSoftwareUpdateProgress")
     }
 
-    func localMobileReader(_ reader: Reader, didFinishInstallingUpdate update: ReaderSoftwareUpdate?, error: Error?) {
+    public func localMobileReader(_ reader: Reader, didFinishInstallingUpdate update: ReaderSoftwareUpdate?, error: Error?) {
         // The update or configuration process has ended.
         print("Entra a didFinishInstallingUpdate")
     }
 
-    func localMobileReaderDidAcceptTermsOfService(_ reader: Reader) {
+    public func localMobileReaderDidAcceptTermsOfService(_ reader: Reader) {
         print("Entra a localMobileReaderDidAcceptTermsOfService")
     }
 
-    func localMobileReader(_ reader: Reader, didRequestReaderInput inputOptions: ReaderInputOptions = []) {
+    public func localMobileReader(_ reader: Reader, didRequestReaderInput inputOptions: ReaderInputOptions = []) {
     }
 
-    func localMobileReader(_ reader: Reader, didRequestReaderDisplayMessage displayMessage: ReaderDisplayMessage) {
+    public func localMobileReader(_ reader: Reader, didRequestReaderDisplayMessage displayMessage: ReaderDisplayMessage) {
     }
     
     public func reader(_ reader: Reader, didReportAvailableUpdate update: ReaderSoftwareUpdate) {
