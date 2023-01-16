@@ -199,6 +199,76 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
             }
             break;
             
+        case "connectLocalMobileReader":
+            if(Terminal.shared.connectionStatus == ConnectionStatus.notConnected){
+                let arguments = call.arguments as! Dictionary<String, Any>?
+                
+                let readerSerialNumber = arguments!["readerSerialNumber"] as! String?
+                
+                let reader = readers.first { reader in
+                    return reader.serialNumber == readerSerialNumber
+                }
+                
+                if(reader == nil) {
+                    result(
+                        FlutterError(
+                            code: "stripeTerminal#readerNotFound",
+                            message: "Reader with provided serial number no longer exists",
+                            details: nil
+                        )
+                    )
+                    return
+                }
+                
+                let locationId = arguments!["locationId"] as? String? ?? reader?.locationId
+                
+                if(locationId == nil) {
+                    result(
+                        FlutterError(
+                            code: "stripeTerminal#locationNotProvided",
+                            message: "Either you have to provide the location id or device should be attached to a location",
+                            details: nil
+                        )
+                    )
+                    return
+                }
+                
+                let connectionConfig = LocalMobileConnectionConfiguration(
+                    locationId: locationId!
+                )
+                
+                Terminal.shared.connectLocalMobileReader(reader!, delegate: self, connectionConfig: connectionConfig) { reader, error in
+                    if reader != nil {
+                        result(true)
+                    } else {
+                        result(
+                            FlutterError(
+                                code: "stripeTerminal#unableToConnect",
+                                message: error?.localizedDescription,
+                                details: nil
+                            )
+                        )
+                    }
+                }
+                
+            } else if(Terminal.shared.connectionStatus == .connecting) {
+                result(
+                    FlutterError(
+                        code: "stripeTerminal#deviceConnecting",
+                        message: "A new connection is being established with a device thus you cannot request a new connection at the moment.",
+                        details: nil
+                    )
+                )
+            } else {
+                result(
+                    FlutterError(
+                        code: "stripeTerminal#deviceAlreadyConnected",
+                        message: "A device with serial number \(Terminal.shared.connectedReader!.serialNumber) is already connected",
+                        details: nil
+                    )
+                )
+            }
+            break;
         case "connectBluetoothReader":
             if(Terminal.shared.connectionStatus == ConnectionStatus.notConnected){
                 let arguments = call.arguments as! Dictionary<String, Any>?
@@ -440,6 +510,21 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
         }
         
         methodChannel.invokeMethod("onReadersFound", arguments: parsedReaders)
+    }
+
+    func localMobileReader(_ reader: Reader, didStartInstallingUpdate update: ReaderSoftwareUpdate, cancelable: Cancelable?) {
+        // An update or configuration process has started.
+        print("Entra a didStartInstallingUpdate")
+    }
+
+    func localMobileReader(_ reader: Reader, didReportReaderSoftwareUpdateProgress progress: Float) {
+        // The update or configuration process has reached the specified progress (0.0 to 1.0).
+        print("Entra a didReportReaderSoftwareUpdateProgress")
+    }
+
+    func localMobileReader(_ reader: Reader, didFinishInstallingUpdate update: ReaderSoftwareUpdate?, error: Error?) {
+        // The update or configuration process has ended.
+        print("Entra a didFinishInstallingUpdate")
     }
     
     public func reader(_ reader: Reader, didReportAvailableUpdate update: ReaderSoftwareUpdate) {

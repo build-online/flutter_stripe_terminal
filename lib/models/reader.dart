@@ -26,7 +26,7 @@ class StripeReader {
     return StripeReader(
       locationStatus: LocationStatus.values[json["locationStatus"]],
       batteryStatus: BatteryStatus.values[json["batteryStatus"]],
-      deviceType: DeviceType.values[json["deviceType"]],
+      deviceType: json["deviceType"] == 10 ? DeviceType.mobilePhoneReader: DeviceType.values[json["deviceType"]],
       originalJSON: Map.from(json["originalJSON"] ?? {}),
       simulated: json["simulated"],
       label: json["label"],
@@ -86,6 +86,8 @@ enum DeviceType {
   chipper1X,
 
   wiseCube,
+
+  mobilePhoneReader,
 
   unknown
 }

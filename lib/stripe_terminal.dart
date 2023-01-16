@@ -94,6 +94,27 @@ class StripeTerminal {
     }
   }
 
+  /// Connects to a local mobile reader, only works if you have scanned devices within this session.
+  ///
+  /// Always run `discoverReaders` before calling this function
+  Future<bool> connectLocalMobileReader(
+    /// Serial number of the local mobile reader to connect with
+    String readerSerialNumber, {
+    /// The id of the location on which you want to conenct this local mobile reader with.
+    String? locationId,
+  }) async {
+    bool? connected =
+        await _channel.invokeMethod<bool?>("connectLocalMobileReader", {
+      "locationId": locationId,
+      "readerSerialNumber": readerSerialNumber,
+    });
+    if (connected == null) {
+      throw Exception("Unable to connect to the reader");
+    } else {
+      return connected;
+    }
+  }
+
   /// Connects to a bluetooth reader, only works if you have scanned devices within this session.
   ///
   /// Always run `discoverReaders` before calling this function
