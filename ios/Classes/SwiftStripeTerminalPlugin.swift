@@ -3,7 +3,7 @@ import UIKit
 import Foundation
 import StripeTerminal
 
-public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelegate, BluetoothReaderDelegate {
+public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelegate, BluetoothReaderDelegate, LocalMobileReaderDelegate {
     
     
     let stripeAPIClient: StripeAPIClient
