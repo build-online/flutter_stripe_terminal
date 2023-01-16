@@ -526,6 +526,16 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
         // The update or configuration process has ended.
         print("Entra a didFinishInstallingUpdate")
     }
+
+    func localMobileReaderDidAcceptTermsOfService(_ reader: Reader) {
+        print("Entra a localMobileReaderDidAcceptTermsOfService")
+    }
+
+    func localMobileReader(_ reader: Reader, didRequestReaderInput inputOptions: ReaderInputOptions = []) {
+    }
+
+    func localMobileReader(_ reader: Reader, didRequestReaderDisplayMessage displayMessage: ReaderDisplayMessage) {
+    }
     
     public func reader(_ reader: Reader, didReportAvailableUpdate update: ReaderSoftwareUpdate) {
         
