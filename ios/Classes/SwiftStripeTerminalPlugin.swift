@@ -222,6 +222,9 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                 
                 let locationId = arguments!["locationId"] as? String? ?? reader?.locationId
                 
+                let onBehalfOf = arguments!["onBehalfOf"] as! String?
+                let merchantDisplayName = arguments!["displayName"] as? String? ?? ""
+                
                 if(locationId == nil) {
                     result(
                         FlutterError(
@@ -234,7 +237,9 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                 }
                 
                 let connectionConfig = LocalMobileConnectionConfiguration(
-                    locationId: locationId!
+                    locationId: locationId!,
+                    merchantDisplayName: merchantDisplayName,
+                    onBehalfOf: onBehalfOf
                 )
                 
                 Terminal.shared.connectLocalMobileReader(reader!, delegate: self, connectionConfig: connectionConfig) { reader, error in

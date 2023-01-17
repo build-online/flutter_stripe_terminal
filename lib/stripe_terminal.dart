@@ -102,11 +102,17 @@ class StripeTerminal {
     String readerSerialNumber, {
     /// The id of the location on which you want to conenct this local mobile reader with.
     String? locationId,
+    /// The id of the connected account on which you want to create the destination charge (the on_behalf_of parameter)
+    String? onBehalfOf,
+    /// Buyer-facing name to display on the payment collection screen
+    String? displayName,
   }) async {
     bool? connected =
         await _channel.invokeMethod<bool?>("connectLocalMobileReader", {
       "locationId": locationId,
       "readerSerialNumber": readerSerialNumber,
+      "onBehalfOf": onBehalfOf,
+      "displayName": displayName,
     });
     if (connected == null) {
       throw Exception("Unable to connect to the reader");
