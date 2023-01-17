@@ -500,13 +500,9 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
             }
             break;
         case "tapToPayOnIphoneIsSupported":
-            let isSupported = true
-            guard PaymentCardReader.isSupported else {
-                // This device doesn't support Tap to Pay on iPhone.
-                isSupported = false
-                return
+            if let isSupported = PaymentCardReader.isSupported {
+                iphoneReader = PaymentCardReader()
             }
-            iphoneReader = PaymentCardReader()
             result(isSupported)
             break;
         default:
