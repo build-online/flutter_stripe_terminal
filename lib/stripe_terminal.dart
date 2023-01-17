@@ -274,4 +274,14 @@ class StripeTerminal {
 
     return StripePaymentIntent.fromMap(paymentIntent);
   }
+
+  /// Checks if TTPOI is supported
+  Future<bool> tapToPayOnIphoneIsSupported() async {
+    bool? isSupported = await _channel.invokeMethod<bool>("tapToPayOnIphoneIsSupported");
+    if (isSupported == null) {
+      throw Exception("Unable to know if Tap to Pay on iPhone is supported");
+    } else {
+      return isSupported;
+    }
+  }
 }

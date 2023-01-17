@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import Foundation
 import StripeTerminal
+import ProximityReader
 
 public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelegate, BluetoothReaderDelegate, LocalMobileReaderDelegate {
     
@@ -10,6 +11,7 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
     let methodChannel: FlutterMethodChannel
     var discoverCancelable: Cancelable?
     var readers: [Reader] = []
+    var iphoneReader: PaymentCardReader?
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "stripe_terminal", binaryMessenger: registrar.messenger())
@@ -496,6 +498,16 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                     }
                 }
             }
+            break;
+        case "tapToPayOnIphoneIsSupported":
+            let isSupported = true
+            guard PaymentCardReader.isSupported else {
+                // This device doesn't support Tap to Pay on iPhone.
+                isSupported = false
+                return
+            }
+            iphoneReader = PaymentCardReader()
+            result(isSupported)
             break;
         default:
             result(
