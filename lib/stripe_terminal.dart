@@ -249,7 +249,7 @@ class StripeTerminal {
       };
       return _readerStreamController.stream;
 
-    } on PlatformException catch(e) {
+    } catch(e) {
       print('entra a error');
       print(e.message);
       throw Exception(e.message);
