@@ -147,7 +147,6 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                             details: nil
                         )
                     )
-                    return
                 } else {
                     result(true)
                 }
