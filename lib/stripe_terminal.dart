@@ -239,14 +239,21 @@ class StripeTerminal {
   ) {
     _readerStreamController = StreamController<List<StripeReader>>();
 
-    _channel.invokeMethod("discoverReaders#start", {
-      "config": config.toMap(),
-    });
-    _readerStreamController.onCancel = () {
-      _channel.invokeMethod("discoverReaders#stop");
-      _readerStreamController.close();
-    };
-    return _readerStreamController.stream;
+    try {
+      _channel.invokeMethod("discoverReaders#start", {
+        "config": config.toMap(),
+      });
+      _readerStreamController.onCancel = () {
+        _channel.invokeMethod("discoverReaders#stop");
+        _readerStreamController.close();
+      };
+      return _readerStreamController.stream;
+
+    } on PlatformException catch(e) {
+      print('entra a error');
+      print(e.message);
+      throw Exception(e.message);
+    }
   }
 
   /// Starts reading payment method based on payment intent.
