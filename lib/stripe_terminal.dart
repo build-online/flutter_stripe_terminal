@@ -17,6 +17,8 @@ class StripeTerminal {
   // Method Channel on which the package operates with the native platform.
   static const MethodChannel _channel = MethodChannel('stripe_terminal');
   final Future<String> Function() _fetchToken;
+  StreamController<dynamic> _collectingPaymentStreamController = StreamController.broadcast();
+  StreamController<dynamic> _waitingForInputStreamController = StreamController.broadcast();
 
   /// Creates an internal `StripeTerminal` instance
   StripeTerminal._internal({
@@ -40,6 +42,15 @@ class StripeTerminal {
             readers.map<StripeReader>((e) => StripeReader.fromJson(e)).toList(),
           );
           return _fetchToken();
+        case "onReaderInput":
+          _waitingForInputStreamController.add(call.arguments);
+          break;
+        case "onReaderDisplayMessage":
+          _collectingPaymentStreamController.add(call.arguments);
+          break;
+        case "onReaderReportedEvent":
+          _collectingPaymentStreamController.add(call.arguments);
+          break;
         default:
           return null;
       }
@@ -249,6 +260,14 @@ class StripeTerminal {
     return _readerStreamController.stream;
   }
 
+  Stream<dynamic> collectingPaymentStream() {
+    return _collectingPaymentStreamController.stream;
+  }
+
+  Stream<dynamic> checkWaitingForInputStream() {
+    return _waitingForInputStreamController.stream;
+  }
+
   /// Starts reading payment method based on payment intent.
   ///
   /// Payment intent is supposed to be generated on your backend and the `clientSecret` of the payment intent
@@ -271,6 +290,9 @@ class StripeTerminal {
       "paymentIntentClientSecret": clientSecret,
       "collectConfiguration": collectConfiguration?.toMap(),
     });
+
+    _collectingPaymentStreamController.close();
+    _waitingForInputStreamController.close();
 
     return StripePaymentIntent.fromMap(paymentIntent);
   }

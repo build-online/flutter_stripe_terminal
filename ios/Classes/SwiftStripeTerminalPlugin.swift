@@ -536,6 +536,10 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
         methodChannel.invokeMethod("onReadersFound", arguments: parsedReaders)
     }
 
+    public func terminal(_ terminal: Terminal, didReportReaderEvent event: ReaderEvent, info: [AnyHashable : Any]?) {
+        methodChannel.invokeMethod("onReaderReportedEvent", arguments: Terminal.stringFromReaderEvent(event))
+    }
+
     public func localMobileReader(_ reader: Reader, didStartInstallingUpdate update: ReaderSoftwareUpdate, cancelable: Cancelable?) {
         // An update or configuration process has started.
         print("Entra a didStartInstallingUpdate")
@@ -556,9 +560,11 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
     }
 
     public func localMobileReader(_ reader: Reader, didRequestReaderInput inputOptions: ReaderInputOptions = []) {
+        methodChannel.invokeMethod("onReaderInput", arguments: Terminal.stringFromReaderInputOptions(inputOptions))
     }
 
     public func localMobileReader(_ reader: Reader, didRequestReaderDisplayMessage displayMessage: ReaderDisplayMessage) {
+        methodChannel.invokeMethod("onReaderDisplayMessage", arguments: Terminal.stringFromReaderDisplayMessage(displayMessage))
     }
     
     public func reader(_ reader: Reader, didReportAvailableUpdate update: ReaderSoftwareUpdate) {
@@ -578,11 +584,15 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
     }
     
     public func reader(_ reader: Reader, didRequestReaderInput inputOptions: ReaderInputOptions = []) {
-        
+        methodChannel.invokeMethod("onReaderInput", arguments: Terminal.stringFromReaderInputOptions(inputOptions))
     }
     
     public func reader(_ reader: Reader, didRequestReaderDisplayMessage displayMessage: ReaderDisplayMessage) {
-        
+        methodChannel.invokeMethod("onReaderDisplayMessage", arguments: Terminal.stringFromReaderDisplayMessage(displayMessage))
+    }
+    
+    public func reader(_ reader: Reader, didReportReaderEvent event: ReaderEvent, info: [AnyHashable : Any]?) {
+        methodChannel.invokeMethod("onReaderReportedEvent", arguments: Terminal.stringFromReaderEvent(event))
     }
     
     private func generateLog(code: String, message: String) {
