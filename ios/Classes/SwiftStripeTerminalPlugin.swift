@@ -45,8 +45,8 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
         case "init":
             if(!Terminal.hasTokenProvider()){
                 Terminal.setTokenProvider(stripeAPIClient)
+                Terminal.shared.delegate = self
             }
-            Terminal.shared.delegate = self
             result(nil)
             break;
             
