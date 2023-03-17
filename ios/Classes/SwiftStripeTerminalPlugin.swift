@@ -4,7 +4,7 @@ import Foundation
 import StripeTerminal
 import ProximityReader
 
-public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelegate, BluetoothReaderDelegate, LocalMobileReaderDelegate {
+public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelegate, BluetoothReaderDelegate, LocalMobileReaderDelegate, TerminalDelegate {
     
     
     let stripeAPIClient: StripeAPIClient
@@ -46,6 +46,7 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
             if(!Terminal.hasTokenProvider()){
                 Terminal.setTokenProvider(stripeAPIClient)
             }
+            Terminal.shared.delegate = self
             result(nil)
             break;
             
@@ -538,6 +539,11 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
 
     public func terminal(_ terminal: Terminal, didReportReaderEvent event: ReaderEvent, info: [AnyHashable : Any]?) {
         methodChannel.invokeMethod("onReaderReportedEvent", arguments: Terminal.stringFromReaderEvent(event))
+    }
+
+    public func terminal(_ terminal: Terminal, didReportUnexpectedReaderDisconnect reader: Reader) {
+        // Consider displaying a UI to notify the user and start rediscovering readers
+        methodChannel.invokeMethod("onReaderUnexpectedDisconnect", arguments: reader.toDict())
     }
 
     public func localMobileReader(_ reader: Reader, didStartInstallingUpdate update: ReaderSoftwareUpdate, cancelable: Cancelable?) {

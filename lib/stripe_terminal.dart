@@ -18,6 +18,7 @@ class StripeTerminal {
   static const MethodChannel _channel = MethodChannel('stripe_terminal');
   final Future<String> Function() _fetchToken;
   StreamController<dynamic> _collectingPaymentStreamController = StreamController.broadcast();
+  StreamController<StripeReader> _unexpectedDisconnectionStreamController = StreamController.broadcast();
   StreamController<dynamic> _waitingForInputStreamController = StreamController.broadcast();
 
   /// Creates an internal `StripeTerminal` instance
@@ -50,6 +51,15 @@ class StripeTerminal {
           break;
         case "onReaderReportedEvent":
           _collectingPaymentStreamController.add(call.arguments);
+          break;
+        case "onReaderUnexpectedDisconnect":
+          Map? arguments = call.arguments;
+          if (arguments == null) {
+            break;
+          } else {
+            StripeReader reader = StripeReader.fromJson(arguments);
+            _unexpectedDisconnectionStreamController.add(reader);
+          }
           break;
         default:
           return null;
@@ -262,6 +272,10 @@ class StripeTerminal {
 
   Stream<dynamic> collectingPaymentStream() {
     return _collectingPaymentStreamController.stream;
+  }
+
+  Stream<StripeReader> unexpectedDisconnectionStream() {
+    return _unexpectedDisconnectionStreamController.stream;
   }
 
   Stream<dynamic> checkWaitingForInputStream() {
