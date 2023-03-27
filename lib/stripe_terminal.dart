@@ -311,6 +311,11 @@ class StripeTerminal {
     return StripePaymentIntent.fromMap(paymentIntent);
   }
 
+  Future<void> cancelCollectPaymentMethod() async {
+    _channel.invokeMethod("collectPaymentMethod#stop");
+    // await _channel.invokeMethod<bool?>("collectPaymentMethod#stop");
+  }
+
   /// Checks if TTPOI is supported
   Future<bool> tapToPayOnIphoneIsSupported() async {
     bool? isSupported = await _channel.invokeMethod<bool>("tapToPayOnIphoneIsSupported");

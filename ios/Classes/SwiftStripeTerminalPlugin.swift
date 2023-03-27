@@ -12,6 +12,7 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
     var discoverCancelable: Cancelable?
     var readers: [Reader] = []
     var iphoneReader: PaymentCardReader?
+    var collectCancelable: Cancelable? = nil
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "stripe_terminal", binaryMessenger: registrar.messenger())
@@ -38,6 +39,12 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                 
             }
         }
+
+        self.collectCancelable?.cancel({ error in
+            
+        })
+        
+        self.collectCancelable = nil
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -470,13 +477,13 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                         )
                     )
                 } else {
-                    Terminal.shared.collectPaymentMethod(paymentIntent!, collectConfig: collectConfig) { paymentIntent, error in
+                    self.collectCancelable = Terminal.shared.collectPaymentMethod(paymentIntent!, collectConfig: collectConfig) { paymentIntent, error in
                         if let error = error {
                             result(
                                 FlutterError(
                                     code: "stripeTerminal#unableToCollectPaymentMethod",
                                     message: "Stripe reader was not able to collect the payment method for the provided payment intent.  \(error.localizedDescription)",
-                                    details: nil
+                                    details: error.localizedDescription
                                 )
                             )
                         } else {
@@ -499,6 +506,32 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                     }
                 }
             }
+            break;
+        case "collectPaymentMethod#stop":
+            if(self.collectCancelable == nil){
+                result(
+                    FlutterError(
+                        code: "stripeTerminal#unableToCancelCollect",
+                        message: "There is no collect action running to stop.",
+                        details: nil
+                    )
+                )
+            } else {
+                self.collectCancelable?.cancel({ error in
+                    if let error = error {
+                        result(
+                            FlutterError(
+                                code: "stripeTerminal#unableToCancelCollect",
+                                message: "Unable to stop the collect action because \(error.localizedDescription) ",
+                                details: nil
+                            )
+                        )
+                    } else {
+                        result(true)
+                    }
+                })
+            }
+            self.collectCancelable = nil;
             break;
         case "tapToPayOnIphoneIsSupported":
             do {
