@@ -665,6 +665,10 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
     override fun onUserLeaveHint() {
         TODO("Not yet implemented")
     }
+    
+    override fun onWindowFocusChanged(p0: Boolean) {
+        TODO("Not yet implemented")
+    }
 
     override fun onConfigurationChanged(p0: Configuration) {
         TODO("Not yet implemented")
