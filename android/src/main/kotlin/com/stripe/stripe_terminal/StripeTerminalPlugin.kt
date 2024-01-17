@@ -235,6 +235,85 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
             "connectionStatus" -> {
                 result.success(handleConnectionStatus(Terminal.getInstance().connectionStatus))
             }
+            "connectLocalMobileReader" -> {
+                when (Terminal.getInstance().connectionStatus) {
+                    ConnectionStatus.NOT_CONNECTED -> {
+                        val arguments = call.arguments as HashMap<*, *>
+                        val readerSerialNumber = arguments["readerSerialNumber"] as String
+
+                        generateLog(
+                                "connectLocalMobileReader",
+                                "Started connecting to $readerSerialNumber"
+                        )
+
+                        val reader = activeReaders.firstOrNull {
+                            it.serialNumber == readerSerialNumber
+                        }
+
+                        if (reader == null) {
+                            result.error(
+                                    "stripeTerminal#readerNotFound",
+                                    "Reader with provided serial number no longer exists",
+                                    null
+                            )
+                            return
+                        }
+
+
+                        val locationId: String? = (arguments["locationId"]
+                                ?: reader.location?.id) as String?
+
+                        val onBehalfOf: String? = arguments["onBehalfOf"] as String?
+                        val merchantDisplayName: String? = (arguments["displayName"] ?: "") as String?
+
+                        generateLog("connectLocalMobileReader", "Location Id $locationId")
+
+                        if (locationId == null) {
+                            result.error(
+                                    "stripeTerminal#locationNotProvided",
+                                    "Either you have to provide the location id or device should be attached to a location",
+                                    null
+                            )
+                            return
+                        }
+                        val connectionConfig =
+                                ConnectionConfiguration.LocalMobileConnectionConfiguration(
+                                        locationId, merchantDisplayName, onBehalfOf
+                                )
+                        Terminal.getInstance().connectLocalMobileReader(
+                                reader,
+                                connectionConfig,
+                                object : ReaderCallback {
+                                    override fun onFailure(e: TerminalException) {
+                                        result.error(
+                                                "stripeTerminal#unableToConnect",
+                                                e.errorMessage,
+                                                e.stackTraceToString()
+                                        )
+                                    }
+
+                                    override fun onSuccess(reader: Reader) {
+                                        result.success(true)
+                                    }
+
+                                })
+                    }
+                    ConnectionStatus.CONNECTING -> {
+                        result.error(
+                                "stripeTerminal#deviceConnecting",
+                                "A new connection is being established with a device thus you cannot request a new connection at the moment.",
+                                null
+                        )
+                    }
+                    ConnectionStatus.CONNECTED -> {
+                        result.error(
+                                "stripeTerminal#deviceAlreadyConnected",
+                                "A device with serial number ${Terminal.getInstance().connectedReader!!.serialNumber} is already connected",
+                                null
+                        )
+                    }
+                }
+            }
             "connectToInternetReader" -> {
                 when (Terminal.getInstance().connectionStatus) {
                     ConnectionStatus.NOT_CONNECTED -> {
