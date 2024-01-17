@@ -61,6 +61,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
     // Create your listener object. Override any methods that you want to be notified about
     val listener = object : TerminalListener {
         override fun onUnexpectedReaderDisconnect(reader: Reader) {
+            channel.invokeMethod("onReaderUnexpectedDisconnect", reader.rawJson())
             // TODO: Trigger the user about the issue.
         }
     }
