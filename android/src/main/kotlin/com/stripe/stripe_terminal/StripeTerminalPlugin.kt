@@ -36,6 +36,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
     private val REQUEST_CODE_LOCATION = 1012
     private lateinit var tokenProvider: StripeTokenProvider
     private var cancelableDiscover: Cancelable? = null
+    private var cancelableCollect: Cancelable? = null
     private var activeReaders: List<Reader> = arrayListOf()
     private var simulated = false
     private val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -62,7 +63,14 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
     val listener = object : TerminalListener {
         override fun onUnexpectedReaderDisconnect(reader: Reader) {
             channel.invokeMethod("onReaderUnexpectedDisconnect", reader.rawJson())
-            // TODO: Trigger the user about the issue.
+        }
+
+        override fun onRequestReaderInput(options: ReaderInputOptions) {
+            channel.invokeMethod("onReaderInput", options.toString())
+        }
+
+        override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
+            channel.invokeMethod("onReaderDisplayMessage", message.toString())
         }
     }
 
@@ -526,7 +534,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                                 }
 
                                 override fun onSuccess(paymentIntent: PaymentIntent) {
-                                    Terminal.getInstance().collectPaymentMethod(
+                                    cancelableCollect = Terminal.getInstance().collectPaymentMethod(
                                         paymentIntent,
                                         object : PaymentIntentCallback {
 
@@ -575,6 +583,32 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
 
                             })
                 }
+            }
+            "collectPaymentMethod#stop" -> {
+                if (cancelableCollect == null) {
+                    result.error(
+                            "stripeTerminal#unableToCancelCollect",
+                            "There is no discover action running to stop.",
+                            null
+                    )
+                } else {
+                    cancelableCollect?.cancel(object : Callback {
+                        override fun onFailure(e: TerminalException) {
+                            result.error(
+                                    "stripeTerminal#unableToCancelCollect",
+                                    "Unable to stop the collect action because ${e.errorMessage}",
+                                    e.stackTraceToString()
+                            )
+                        }
+
+                        override fun onSuccess() {
+                            result.success(true)
+                        }
+                    })
+                    cancelableCollect = null
+
+                }
+
             }
             "disconnectFromReader" -> {
                 if (Terminal.getInstance().connectedReader != null) {
@@ -678,6 +712,16 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
             }
         )
         cancelableDiscover = null
+        cancelableCollect?.cancel(
+                object : Callback {
+                    override fun onFailure(e: TerminalException) {
+                    }
+
+                    override fun onSuccess() {
+                    }
+                }
+        )
+        cancelableCollect = null
     }
 
     override fun onDetachedFromActivity() {
