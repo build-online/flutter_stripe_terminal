@@ -272,8 +272,8 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                         val locationId: String? = (arguments["locationId"]
                                 ?: reader.location?.id) as String?
 
-                        val onBehalfOf: String? = arguments["onBehalfOf"] as String?
-                        val merchantDisplayName: String? = (arguments["displayName"] ?: "") as String?
+                        // val onBehalfOf: String? = arguments["onBehalfOf"] as String?
+                        // val merchantDisplayName: String? = (arguments["displayName"] ?: "") as String?
 
                         generateLog("connectLocalMobileReader", "Location Id $locationId")
 
@@ -285,10 +285,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                             )
                             return
                         }
-                        val connectionConfig =
-                                ConnectionConfiguration.LocalMobileConnectionConfiguration(
-                                        locationId, merchantDisplayName, onBehalfOf
-                                )
+                        val connectionConfig = ConnectionConfiguration.LocalMobileConnectionConfiguration(locationId)
                         Terminal.getInstance().connectLocalMobileReader(
                                 reader,
                                 connectionConfig,
