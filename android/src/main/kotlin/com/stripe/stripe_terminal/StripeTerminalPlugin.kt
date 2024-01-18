@@ -63,14 +63,6 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
         override fun onUnexpectedReaderDisconnect(reader: Reader) {
             channel.invokeMethod("onReaderUnexpectedDisconnect", reader.rawJson())
         }
-
-        override fun onRequestReaderInput(options: ReaderInputOptions) {
-            channel.invokeMethod("onReaderInput", options.toString())
-        }
-
-        override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
-            channel.invokeMethod("onReaderDisplayMessage", message.toString())
-        }
     }
 
 
@@ -428,8 +420,13 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                             reader,
                             connectionConfig,
                             object : BluetoothReaderListener {
+                                override fun onRequestReaderInput(options: ReaderInputOptions) {
+                                    channel.invokeMethod("onReaderInput", options.toString())
+                                }
 
-
+                                override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
+                                    channel.invokeMethod("onReaderDisplayMessage", message.toString())
+                                }
                             },
                             object : ReaderCallback {
                                 override fun onFailure(e: TerminalException) {
