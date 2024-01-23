@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.TerminalApplicationDelegate
-import com.stripe.stripeterminal.external.OnReaderTips
 import com.stripe.stripeterminal.external.callable.*
 import com.stripe.stripeterminal.external.models.*
 import com.stripe.stripeterminal.log.LogLevel
@@ -64,14 +63,6 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
         override fun onUnexpectedReaderDisconnect(reader: Reader) {
             channel.invokeMethod("onReaderUnexpectedDisconnect", reader.rawJson())
         }
-
-        override fun onRequestReaderInput(options: ReaderInputOptions) {
-            channel.invokeMethod("onReaderInput", options.toString())
-        }
-
-        override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
-            channel.invokeMethod("onReaderDisplayMessage", message.toString())
-        }
     }
 
 
@@ -102,7 +93,6 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
         channel.invokeMethod("onNativeLog", log)
     }
 
-    @OptIn(OnReaderTips::class)
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
             "init" -> {
@@ -283,8 +273,8 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                         val locationId: String? = (arguments["locationId"]
                                 ?: reader.location?.id) as String?
 
-                        val onBehalfOf: String? = arguments["onBehalfOf"] as String?
-                        val merchantDisplayName: String? = (arguments["displayName"] ?: "") as String?
+                        // val onBehalfOf: String? = arguments["onBehalfOf"] as String?
+                        // val merchantDisplayName: String? = (arguments["displayName"] ?: "") as String?
 
                         generateLog("connectLocalMobileReader", "Location Id $locationId")
 
@@ -296,10 +286,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                             )
                             return
                         }
-                        val connectionConfig =
-                                ConnectionConfiguration.LocalMobileConnectionConfiguration(
-                                        locationId, merchantDisplayName, onBehalfOf
-                                )
+                        val connectionConfig = ConnectionConfiguration.LocalMobileConnectionConfiguration(locationId)
                         Terminal.getInstance().connectLocalMobileReader(
                                 reader,
                                 connectionConfig,
@@ -444,8 +431,13 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                             reader,
                             connectionConfig,
                             object : BluetoothReaderListener {
+                                override fun onRequestReaderInput(options: ReaderInputOptions) {
+                                    channel.invokeMethod("onReaderInput", options.toString())
+                                }
 
-
+                                override fun onRequestReaderDisplayMessage(message: ReaderDisplayMessage) {
+                                    channel.invokeMethod("onReaderDisplayMessage", message.toString())
+                                }
                             },
                             object : ReaderCallback {
                                 override fun onFailure(e: TerminalException) {
