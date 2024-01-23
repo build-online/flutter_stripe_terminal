@@ -168,23 +168,12 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                             null
                         )
 
-                if (discoveryMethod == DiscoveryMethod.LOCAL_MOBILE) {
-                    var isSimulated = discoverConfig["simulated"] as Boolean
-                    generateLog(
-                            "testLocalMobile",
-                            "Started the discover process. Simulated mode: $isSimulated"
-                    )
-                    val config = DiscoveryConfiguration.LocalMobileDiscoveryConfiguration(
-                            isSimulated = isSimulated,
-                    )
-                } else {
-                    val config = DiscoveryConfiguration(
-                            isSimulated = discoverConfig["simulated"] as Boolean,
-                            discoveryMethod = discoveryMethod,
-                            location = discoverConfig["locationId"] as String?
-                    )
-                }
-
+                val config = DiscoveryConfiguration(
+                        isSimulated = discoverConfig["simulated"] as Boolean,
+                        discoveryMethod = discoveryMethod,
+                        location = discoverConfig["locationId"] as String?
+                )
+                
                 cancelableDiscover =
                     Terminal.getInstance().discoverReaders(config, object : DiscoveryListener {
 
