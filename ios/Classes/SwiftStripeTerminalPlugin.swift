@@ -494,7 +494,7 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                                         FlutterError(
                                             code: "stripeTerminal#unableToProcessPayment",
                                             message: "Stripe reader was not able to process the payment for the provided payment intent.  \(error.localizedDescription)",
-                                            details: nil
+                                            details: error.localizedDescription
                                         )
                                     )
                                 } else {
