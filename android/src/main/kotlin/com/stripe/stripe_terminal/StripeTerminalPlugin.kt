@@ -559,7 +559,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                                                                 result.error(
                                                                     "stripeTerminal#unableToProcessPayment",
                                                                     "Stripe reader was not able to process the payment for the provided payment intent. ${e.errorMessage}",
-                                                                    e.stackTraceToString()
+                                                                    e.errorMessage
                                                                 )
                                                             }
                                                         })
@@ -569,7 +569,7 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                                                 result.error(
                                                     "stripeTerminal#unableToCollectPaymentMethod",
                                                     "Stripe reader was not able to collect the payment method for the provided payment intent. ${e.errorMessage}",
-                                                    e.stackTraceToString()
+                                                    e.errorMessage
                                                 )
                                             }
                                         },
