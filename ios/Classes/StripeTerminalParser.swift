@@ -10,14 +10,14 @@ import StripeTerminal
 
 class StripeTerminalParser {
     
-    static func getScanMethod(discoveryMethod: String) -> DiscoveryMethod? {
+    static func getDiscoveryConfiguration(discoveryMethod: String, isSimulated: Bool, locationId: String) -> DiscoveryConfiguration? {
         switch(discoveryMethod){
         case "bluetooth":
-            return DiscoveryMethod.bluetoothScan;
+            return try BluetoothScanDiscoveryConfigurationBuilder().setSimulated(isSimulated).build()
         case "internet":
-            return DiscoveryMethod.internet;
+            return try InternetDiscoveryConfigurationBuilder().setLocationId(locationId).build()
         case "localMobile":
-            return DiscoveryMethod.localMobile;
+            return try LocalMobileDiscoveryConfigurationBuilder().build()
         default:
             return nil;
         }

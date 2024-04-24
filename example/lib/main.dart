@@ -180,18 +180,6 @@ class _MyAppState extends State<MyApp> {
                 ),
               ),
             TextButton(
-              child: const Text("Read Reusable Card Detail"),
-              onPressed: () async {
-                stripeTerminal
-                    .readReusableCardDetail()
-                    .then((StripePaymentMethod paymentMethod) {
-                  _showSnackbar(
-                    "A card was read: ${paymentMethod.card?.toJson()}",
-                  );
-                });
-              },
-            ),
-            TextButton(
               child: const Text("Set reader display"),
               onPressed: () async {
                 stripeTerminal.setReaderDisplay(

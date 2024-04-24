@@ -463,33 +463,6 @@ class StripeTerminalPlugin : FlutterPlugin, MethodCallHandler,
                     }
                 }
             }
-            "readReusableCardDetail" -> {
-                generateLog("readReusableCardDetail", "Started reading payment method")
-
-                if (Terminal.getInstance().connectedReader == null) {
-                    result.error(
-                        "stripeTerminal#deviceNotConnected",
-                        "You must connect to a device before you can use it.",
-                        null
-                    )
-                } else {
-                    val params = ReadReusableCardParameters.Builder().build()
-                    Terminal.getInstance().readReusableCard(params, object : PaymentMethodCallback {
-                        override fun onFailure(e: TerminalException) {
-                            result.error(
-                                "stripeTerminal#unableToReadCardDetail",
-                                "Device was not able to read payment method details because ${e.errorMessage}",
-                                e.stackTraceToString()
-                            )
-                        }
-
-                        override fun onSuccess(paymentMethod: PaymentMethod) {
-                            result.success(paymentMethod.rawJson())
-                        }
-
-                    })
-                }
-            }
             "collectPaymentMethod" -> {
                 generateLog("collectPaymentMethod", "Started reading payment method")
 

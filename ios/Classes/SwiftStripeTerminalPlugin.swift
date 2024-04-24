@@ -128,9 +128,9 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
             let simulated = configData["simulated"] as! Bool
             let locationId = configData["locationId"] as? String
             let discoveryMethodString = configData["discoveryMethod"] as! String
-            let discoveryMethod = StripeTerminalParser.getScanMethod(discoveryMethod: discoveryMethodString)
+            let config = StripeTerminalParser.getDiscoveryConfiguration(discoveryMethod: discoveryMethodString, simulated: simulated, locationId: locationId)
             
-            if(discoveryMethod == nil){
+            if(discoveryConfiguration == nil){
                 return result(
                     FlutterError(
                         code: "stripeTerminal#invalidRequest",
@@ -139,12 +139,6 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                     )
                 )
             }
-            
-            let config = DiscoveryConfiguration(
-                discoveryMethod: discoveryMethod!,
-                locationId: locationId,
-                simulated: simulated
-            )
             
             self.discoverCancelable = Terminal.shared.discoverReaders(config, delegate: self) { error in
                 if let error = error {
@@ -412,32 +406,6 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                 )
             }
             break;
-        case "readReusableCardDetail":
-            if(Terminal.shared.connectedReader == nil){
-                result(
-                    FlutterError(
-                        code: "stripeTerminal#deviceNotConnected",
-                        message: "You must connect to a device before you can use it.",
-                        details: nil
-                    )
-                )
-            } else {
-                let params =  ReadReusableCardParameters()
-                Terminal.shared.readReusableCard(params) { paymentMethod, error in
-                    if(paymentMethod != nil){
-                        result(paymentMethod?.originalJSON)
-                    } else {
-                        result(
-                            FlutterError(
-                                code: "stripeTerminal#unabletToReadCardDetail",
-                                message: "Device was not able to read payment method details.",
-                                details: nil
-                            )
-                        )
-                    }
-                }
-            }
-            break;
         case "collectPaymentMethod":
             if(Terminal.shared.connectedReader == nil){
                 result(
@@ -466,7 +434,7 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
             }
             
             let collectConfiguration = arguments!["collectConfiguration"] as! Dictionary<String, Any>?
-            let collectConfig = CollectConfiguration(skipTipping: collectConfiguration!["skipTipping"] as! Bool)
+            let collectConfig = try CollectConfigurationBuilder(skipTipping: collectConfiguration!["skipTipping"] as! Bool).build()
             Terminal.shared.retrievePaymentIntent(clientSecret: paymentIntentClientSecret!) { paymentIntent, error in
                 if let error = error {
                     result(
@@ -488,17 +456,17 @@ public class SwiftStripeTerminalPlugin: NSObject, FlutterPlugin, DiscoveryDelega
                             )
                         } else {
                             self.generateLog(code: "collectPaymentMethod", message: paymentIntent!.originalJSON.description)
-                            Terminal.shared.processPayment(paymentIntent!) { paymentIntent, error in
+                            Terminal.shared.confirmPaymentIntent(paymentIntent!) { paymentIntent, error in
                                 if let error = error {
                                     result(
                                         FlutterError(
-                                            code: "stripeTerminal#unableToProcessPayment",
-                                            message: "Stripe reader was not able to process the payment for the provided payment intent.  \(error.localizedDescription)",
+                                            code: "stripeTerminal#unableToConfirmPaymentIntent",
+                                            message: "Stripe reader was not able to confirm the payment intent.  \(error.localizedDescription)",
                                             details: error.localizedDescription
                                         )
                                     )
                                 } else {
-                                    self.generateLog(code: "processPayment", message: paymentIntent!.originalJSON.description)
+                                    self.generateLog(code: "confirmPaymentIntent", message: paymentIntent!.originalJSON.description)
                                     result(paymentIntent?.originalJSON)
                                 }
                             }

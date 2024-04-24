@@ -239,14 +239,6 @@ class StripeTerminal {
     }
   }
 
-  /// Extracts payment method from the reader
-  ///
-  /// Only support `insert` operation on the reader
-  Future<StripePaymentMethod> readReusableCardDetail() async {
-    Map cardDetail = await _channel.invokeMethod("readReusableCardDetail");
-    return StripePaymentMethod.fromJson(cardDetail);
-  }
-
   late StreamController<List<StripeReader>> _readerStreamController;
 
   /// Starts scanning readers in the vicinity. This will return a list of readers.
